@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - Sistema Financeiro</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  max-width: 450px;
+  width: 100%;
+  padding: 50px 40px;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-icon {
+  font-size: 64px;
+  margin-bottom: 10px;
+}
+
+h1 {
+  text-align: center;
+  color: #667eea;
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #999;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.tab {
+  flex: 1;
+  padding: 15px;
+  text-align: center;
+  cursor: pointer;
+  color: #999;
+  font-weight: 600;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s;
+}
+
+.tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+.form-section {
+  display: none;
+}
+
+.form-section.active {
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.divider {
+  text-align: center;
+  margin: 25px 0;
+  color: #999;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.referral-input {
+  background: #f8f9fa;
+  border-color: #f8f9fa;
+}
+
+.referral-input:focus {
+  background: white;
+}
+
+.message {
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: none;
+  font-size: 14px;
+  animation: slideDown 0.3s;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  display: block;
+}
+
+.message.error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  display: block;
+}
+
+.loading {
+  display: none;
+  text-align: center;
+  padding: 20px;
+}
+
+.loading.show {
+  display: block;
+}
+
+.spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.forgot-password {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.forgot-password a {
+  color: #667eea;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 30px 20px;
+  }
+  
+  h1 {
+    font-size: 24px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo">
+    <div class="logo-icon">💰</div>
+    <h1>Sistema Financeiro</h1>
+    <p class="subtitle">Controle suas finanças de forma inteligente</p>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('login')">Entrar</div>
+    <div class="tab" onclick="switchTab('register')">Criar Conta</div>
+  </div>
+
+  <div id="message" class="message"></div>
+
+  <!-- FORMULÁRIO DE LOGIN -->
+  <div id="loginForm" class="form-section active">
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="loginSenha">Senha</label>
+        <input type="password" id="loginSenha" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn-primary" id="btnLogin">
+        Entrar
+      </button>
+    </form>
+
+    <div class="forgot-password">
+      <a href="#" onclick="alert('Funcionalidade em breve!')">Esqueceu a senha?</a>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO DE REGISTRO -->
+  <div id="registerForm" class="form-section">
+    <form onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="regNome">Nome Completo</label>
+        <input type="text" id="regNome" placeholder="Seu nome" required>
+      </div>
+
+      <div class="form-group">
+        <label for="regEmail">Email</label>
+        <input type="email" id="regEmail" placeholder="seu@email.com" required>
+      </div>
+
+      <div class="form-group">
+        <label for="regSenha">Senha</label>
+        <input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" minlength="6" required>
+      </div>
+
+      <div class="form-group">
+        <label for="regSenhaConfirm">Confirmar Senha</label>
+        <input type="password" id="regSenhaConfirm" placeholder="Digite a senha novamente" required>
+      </div>
+
+      <div class="divider">Opcional</div>
+
+      <div class="form-group">
+        <label for="regReferral">Código de Indicação (opcional)</label>
+        <input type="text" id="regReferral" class="referral-input" placeholder="REFXXXXX">
+      </div>
+
+      <button type="submit" class="btn-primary" id="btnRegister">
+        Criar Conta Grátis
+      </button>
+
+      <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #999;">
+        Ao criar uma conta, você concorda com nossos
+        <a href="#" style="color: #667eea;">Termos de Uso</a>
+      </p>
+    </form>
+  </div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p style="margin-top: 10px; color: #999;">Processando...</p>
+  </div>
+</div>
+
+<script src="sistema-licencas-sheets.js"></script>
+<script>
+// ==================== CONFIGURAÇÃO ====================
+// ⚠️ IMPORTANTE: Substitua pela URL do seu Google Apps Script
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwHKLI8gLj8nZiZba4fq_dbnwdGU-DduqndlIOqUJCnzv6gB_-Z7Tweg63rSFBoa_hh/exec';
+
+// Inicializar sistema
+const sistema = new SistemaLicencasSheets(SHEETS_URL);
+
+// ==================== FUNÇÕES DE UI ====================
+function switchTab(tab) {
+  // Remover active de todas as tabs
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
+  
+  // Ativar tab selecionada
+  if (tab === 'login') {
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    document.getElementById('loginForm').classList.add('active');
+  } else {
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    document.getElementById('registerForm').classList.add('active');
+  }
+  
+  // Limpar mensagens
+  hideMessage();
+}
+
+function showMessage(mensagem, tipo = 'success') {
+  const messageEl = document.getElementById('message');
+  messageEl.textContent = mensagem;
+  messageEl.className = `message ${tipo}`;
+  messageEl.style.display = 'block';
+  
+  // Auto-esconder após 5 segundos
+  setTimeout(() => {
+    hideMessage();
+  }, 5000);
+}
+
+function hideMessage() {
+  const messageEl = document.getElementById('message');
+  messageEl.style.display = 'none';
+}
+
+function showLoading() {
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('btnLogin').disabled = true;
+  document.getElementById('btnRegister').disabled = true;
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+  document.getElementById('btnLogin').disabled = false;
+  document.getElementById('btnRegister').disabled = false;
+}
+
+// ==================== HANDLERS ====================
+async function handleLogin(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById('loginEmail').value;
+  const senha = document.getElementById('loginSenha').value;
+  
+  if (!email || !senha) {
+    showMessage('Preencha todos os campos', 'error');
+    return;
+  }
+  
+  showLoading();
+  hideMessage();
+  
+  try {
+    const resultado = await sistema.fazerLogin(email, senha);
+    
+    if (resultado.sucesso) {
+      showMessage('✅ Login realizado com sucesso! Redirecionando...', 'success');
+      
+      // Redirecionar para o sistema após 1 segundo
+      setTimeout(() => {
+        window.location.href = 'index.html'; // Seu sistema principal
+      }, 1000);
+    } else {
+      showMessage('❌ ' + (resultado.erro || 'Email ou senha incorretos'), 'error');
+    }
+  } catch (error) {
+    console.error('Erro no login:', error);
+    showMessage('❌ Erro ao conectar. Tente novamente.', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleRegister(event) {
+  event.preventDefault();
+  
+  const nome = document.getElementById('regNome').value;
+  const email = document.getElementById('regEmail').value;
+  const senha = document.getElementById('regSenha').value;
+  const senhaConfirm = document.getElementById('regSenhaConfirm').value;
+  const codigoReferral = document.getElementById('regReferral').value;
+  
+  // Validações
+  if (!nome || !email || !senha) {
+    showMessage('Preencha todos os campos obrigatórios', 'error');
+    return;
+  }
+  
+  if (senha !== senhaConfirm) {
+    showMessage('As senhas não coincidem', 'error');
+    return;
+  }
+  
+  if (senha.length < 6) {
+    showMessage('A senha deve ter no mínimo 6 caracteres', 'error');
+    return;
+  }
+  
+  showLoading();
+  hideMessage();
+  
+  try {
+    const resultado = await sistema.registrarUsuario(email, senha, nome);
+    
+    if (resultado.sucesso) {
+      // Se tem código de indicação, registrar
+      if (codigoReferral) {
+        await sistema.registrarIndicacao(codigoReferral);
+      }
+      
+      showMessage('✅ Conta criada com sucesso! Redirecionando...', 'success');
+      
+      // Redirecionar para o sistema após 1 segundo
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1000);
+    } else {
+      showMessage('❌ ' + (resultado.erro || 'Erro ao criar conta'), 'error');
+    }
+  } catch (error) {
+    console.error('Erro no registro:', error);
+    showMessage('❌ Erro ao conectar. Tente novamente.', 'error');
+  } finally {
+    hideLoading();
+  }
+}
+
+// ==================== VERIFICAR SE JÁ ESTÁ LOGADO ====================
+window.onload = function() {
+  if (sistema.verificarLogado()) {
+    // Já está logado, redirecionar
+    window.location.href = 'index.html';
+  }
+  
+  // Verificar se tem código de indicação na URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const refCode = urlParams.get('ref');
+  
+  if (refCode) {
+    // Mudar para aba de registro e preencher código
+    switchTab('register');
+    document.getElementById('regReferral').value = refCode;
+    showMessage('✨ Você foi indicado! Complete o cadastro para ganhar bônus.', 'success');
+  }
+};
+</script>
+
+</body>
+</html>
