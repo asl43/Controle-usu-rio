@@ -2,8 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<title>Sistema Financeiro Pessoal - Completo</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - Sistema Financeiro</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 * {
   margin: 0;
@@ -15,13 +21,18 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
+}
+
+/* ==================== TELA DE LOGIN ==================== */
+.login-screen {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
   padding: 20px;
 }
 
-.container {
+.login-container {
   background: white;
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -40,7 +51,7 @@ body {
   margin-bottom: 10px;
 }
 
-h1 {
+.login-container h1 {
   text-align: center;
   color: #667eea;
   font-size: 32px;
@@ -137,58 +148,12 @@ h1 {
   transform: none;
 }
 
-.divider {
-  text-align: center;
-  margin: 25px 0;
-  color: #999;
-  position: relative;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 40%;
-  height: 1px;
-  background: #e0e0e0;
-}
-
-.divider::before {
-  left: 0;
-}
-
-.divider::after {
-  right: 0;
-}
-
-.referral-input {
-  background: #f8f9fa;
-  border-color: #f8f9fa;
-}
-
-.referral-input:focus {
-  background: white;
-}
-
 .message {
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 20px;
   display: none;
   font-size: 14px;
-  animation: slideDown 0.3s;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 .message.success {
@@ -205,159 +170,525 @@ h1 {
   display: block;
 }
 
-.loading {
+/* ==================== SISTEMA PRINCIPAL ==================== */
+.main-system {
   display: none;
-  text-align: center;
-  padding: 20px;
+  width: 100%;
+  min-height: 100vh;
+  background: #f4f6f9;
 }
 
-.loading.show {
+.main-system.active {
   display: block;
 }
 
-.spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.header h1 {
+  font-size: 24px;
 }
 
-.forgot-password {
-  text-align: center;
-  margin-top: 15px;
+.user-info {
+  text-align: right;
 }
 
-.forgot-password a {
-  color: #667eea;
-  text-decoration: none;
+.user-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.user-plan {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.btn-sair {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 5px;
   font-size: 14px;
 }
 
-.forgot-password a:hover {
-  text-decoration: underline;
+.btn-sair:hover {
+  background: rgba(255,255,255,0.3);
 }
 
-@media (max-width: 480px) {
-  .container {
-    padding: 30px 20px;
+/* Widget de Plano */
+.plan-widget {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 9998;
+}
+
+.plan-widget-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.plan-info strong {
+  color: #667eea;
+  display: block;
+}
+
+.plan-info small {
+  font-size: 12px;
+  color: #999;
+  display: block;
+  margin-top: 5px;
+}
+
+.btn-upgrade {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.btn-upgrade:hover {
+  transform: scale(1.05);
+}
+
+/* Cards principais */
+.cards-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.main-card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.3s, box-shadow 0.3s;
+  text-align: center;
+}
+
+.main-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.main-card .icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.main-card h3 {
+  color: #333;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.main-card p {
+  color: #666;
+  font-size: 14px;
+}
+
+/* Resto dos estilos do sistema original... */
+/* (incluindo módulos, tabelas, formulários, etc) */
+
+.module-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.module-container.active {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+}
+
+.module-content {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  margin-top: 20px;
+}
+
+.module-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 20px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.module-header h2 {
+  font-size: 24px;
+}
+
+.btn-close {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-close:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+.module-body {
+  padding: 20px;
+}
+
+/* Notificação flutuante */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  z-index: 10000;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast.success {
+  border-left: 4px solid #28a745;
+}
+
+.toast.error {
+  border-left: 4px solid #e74c3c;
+}
+
+.toast.warning {
+  border-left: 4px solid #ffc107;
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    text-align: center;
   }
   
-  h1 {
-    font-size: 24px;
+  .plan-widget {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+  }
+  
+  .plan-widget-content {
+    flex-direction: column;
+    gap: 10px;
   }
 }
 </style>
 </head>
+
 <body>
 
-<div class="container">
-  <div class="logo">
-    <div class="logo-icon">💰</div>
-    <h1>Sistema Financeiro</h1>
-    <p class="subtitle">Controle suas finanças de forma inteligente</p>
-  </div>
-
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab('login')">Entrar</div>
-    <div class="tab" onclick="switchTab('register')">Criar Conta</div>
-  </div>
-
-  <div id="message" class="message"></div>
-
-  <!-- FORMULÁRIO DE LOGIN -->
-  <div id="loginForm" class="form-section active">
-    <form onsubmit="handleLogin(event)">
-      <div class="form-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" placeholder="seu@email.com" required>
-      </div>
-
-      <div class="form-group">
-        <label for="loginSenha">Senha</label>
-        <input type="password" id="loginSenha" placeholder="••••••••" required>
-      </div>
-
-      <button type="submit" class="btn-primary" id="btnLogin">
-        Entrar
-      </button>
-    </form>
-
-    <div class="forgot-password">
-      <a href="#" onclick="alert('Funcionalidade em breve!')">Esqueceu a senha?</a>
+<!-- ==================== TELA DE LOGIN ==================== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-container">
+    <div class="logo">
+      <div class="logo-icon">💰</div>
+      <h1>Sistema Financeiro</h1>
+      <p class="subtitle">Controle suas finanças de forma inteligente</p>
     </div>
-  </div>
 
-  <!-- FORMULÁRIO DE REGISTRO -->
-  <div id="registerForm" class="form-section">
-    <form onsubmit="handleRegister(event)">
-      <div class="form-group">
-        <label for="regNome">Nome Completo</label>
-        <input type="text" id="regNome" placeholder="Seu nome" required>
-      </div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="tab" onclick="switchTab('register')">Criar Conta</div>
+    </div>
 
-      <div class="form-group">
-        <label for="regEmail">Email</label>
-        <input type="email" id="regEmail" placeholder="seu@email.com" required>
-      </div>
+    <div id="loginMessage" class="message"></div>
 
-      <div class="form-group">
-        <label for="regSenha">Senha</label>
-        <input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" minlength="6" required>
-      </div>
+    <!-- LOGIN -->
+    <div id="loginForm" class="form-section active">
+      <form onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" placeholder="seu@email.com" required>
+        </div>
 
-      <div class="form-group">
-        <label for="regSenhaConfirm">Confirmar Senha</label>
-        <input type="password" id="regSenhaConfirm" placeholder="Digite a senha novamente" required>
-      </div>
+        <div class="form-group">
+          <label for="loginSenha">Senha</label>
+          <input type="password" id="loginSenha" placeholder="••••••••" required>
+        </div>
 
-      <div class="divider">Opcional</div>
+        <button type="submit" class="btn-primary" id="btnLogin">Entrar</button>
+      </form>
+    </div>
 
-      <div class="form-group">
-        <label for="regReferral">Código de Indicação (opcional)</label>
-        <input type="text" id="regReferral" class="referral-input" placeholder="REFXXXXX">
-      </div>
+    <!-- REGISTRO -->
+    <div id="registerForm" class="form-section">
+      <form onsubmit="handleRegister(event)">
+        <div class="form-group">
+          <label for="regNome">Nome Completo</label>
+          <input type="text" id="regNome" placeholder="Seu nome" required>
+        </div>
 
-      <button type="submit" class="btn-primary" id="btnRegister">
-        Criar Conta Grátis
-      </button>
+        <div class="form-group">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" placeholder="seu@email.com" required>
+        </div>
 
-      <p style="text-align: center; margin-top: 15px; font-size: 12px; color: #999;">
-        Ao criar uma conta, você concorda com nossos
-        <a href="#" style="color: #667eea;">Termos de Uso</a>
-      </p>
-    </form>
-  </div>
+        <div class="form-group">
+          <label for="regSenha">Senha</label>
+          <input type="password" id="regSenha" placeholder="Mínimo 6 caracteres" minlength="6" required>
+        </div>
 
-  <div class="loading" id="loading">
-    <div class="spinner"></div>
-    <p style="margin-top: 10px; color: #999;">Processando...</p>
+        <div class="form-group">
+          <label for="regSenhaConfirm">Confirmar Senha</label>
+          <input type="password" id="regSenhaConfirm" placeholder="Digite novamente" required>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btnRegister">Criar Conta Grátis</button>
+      </form>
+    </div>
   </div>
 </div>
 
-<script src="sistema-licencas-sheets.js"></script>
+<!-- ==================== SISTEMA PRINCIPAL ==================== -->
+<div class="main-system" id="mainSystem">
+  <div class="header">
+    <div class="header-content">
+      <h1>💰 Sistema Financeiro Pessoal</h1>
+      <div class="user-info">
+        <div class="user-name" id="userName">Usuário</div>
+        <div class="user-plan" id="userPlanDisplay">Plano: Gratuito</div>
+        <button class="btn-sair" onclick="fazerLogout()">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Widget de Plano -->
+  <div class="plan-widget">
+    <div class="plan-widget-content">
+      <div class="plan-info">
+        <strong>Plano: <span id="planName">Gratuito</span></strong>
+        <small id="planLimits">0/50 transações</small>
+      </div>
+      <button class="btn-upgrade" onclick="abrirPlanos()">Upgrade ⭐</button>
+    </div>
+  </div>
+
+  <div class="cards-container">
+    <div class="main-card" onclick="showToast('Módulo em desenvolvimento', 'warning')">
+      <div class="icon">💸</div>
+      <h3>Financeiro</h3>
+      <p>Controle suas receitas e despesas</p>
+    </div>
+
+    <div class="main-card" onclick="showToast('Módulo em desenvolvimento', 'warning')">
+      <div class="icon">📈</div>
+      <h3>Investimentos</h3>
+      <p>Gerencie sua carteira</p>
+    </div>
+
+    <div class="main-card" onclick="abrirPlanos()">
+      <div class="icon">⭐</div>
+      <h3>Ver Planos</h3>
+      <p>Faça upgrade do seu plano</p>
+    </div>
+
+    <div class="main-card" onclick="abrirIndicacoes()">
+      <div class="icon">🤝</div>
+      <h3>Indicar Amigos</h3>
+      <p>Ganhe benefícios indicando</p>
+    </div>
+  </div>
+</div>
+
+<!-- Notificação Toast -->
+<div class="toast" id="toast"></div>
+
 <script>
 // ==================== CONFIGURAÇÃO ====================
-// ⚠️ IMPORTANTE: Substitua pela URL do seu Google Apps Script
 const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbwHKLI8gLj8nZiZba4fq_dbnwdGU-DduqndlIOqUJCnzv6gB_-Z7Tweg63rSFBoa_hh/exec';
 
-// Inicializar sistema
-const sistema = new SistemaLicencasSheets(SHEETS_URL);
+// ==================== SISTEMA DE LICENÇAS (INLINE) ====================
+class SistemaLicencas {
+  constructor(url) {
+    this.SHEETS_URL = url;
+    this.limites = {
+      gratuito: { transacoes: 50 },
+      basico: { transacoes: Infinity },
+      premium: { transacoes: Infinity },
+      empresarial: { transacoes: Infinity }
+    };
+  }
 
-// ==================== FUNÇÕES DE UI ====================
+  async registrarUsuario(email, senha, nome) {
+    try {
+      const userId = 'USER_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const senhaHash = await this.hashSenha(senha);
+      
+      const dados = {
+        acao: 'registrar',
+        userId: userId,
+        email: email,
+        senha: senhaHash,
+        nome: nome,
+        plano: 'gratuito',
+        dataCriacao: new Date().toISOString(),
+        dataExpiracao: null,
+        transacoesUsadas: 0,
+        status: 'ativo',
+        codigoIndicacao: 'REF' + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        token: 'TOKEN_' + Date.now() + '_' + Math.random().toString(36).substr(2, 16)
+      };
+
+      const response = await fetch(this.SHEETS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(dados)
+      });
+
+      const resultado = await response.json();
+      
+      if (resultado.sucesso) {
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('userToken', dados.token);
+        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userNome', nome);
+        localStorage.setItem('userPlano', 'gratuito');
+        localStorage.setItem('codigoIndicacao', dados.codigoIndicacao);
+        return { sucesso: true };
+      }
+      
+      return { sucesso: false, erro: resultado.mensagem };
+    } catch (error) {
+      console.error('Erro ao registrar:', error);
+      return { sucesso: false, erro: 'Erro ao conectar' };
+    }
+  }
+
+  async fazerLogin(email, senha) {
+    try {
+      const senhaHash = await this.hashSenha(senha);
+      
+      const response = await fetch(this.SHEETS_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({
+          acao: 'login',
+          email: email,
+          senha: senhaHash
+        })
+      });
+
+      const resultado = await response.json();
+      
+      if (resultado.sucesso) {
+        localStorage.setItem('userId', resultado.usuario.userId);
+        localStorage.setItem('userToken', resultado.usuario.token);
+        localStorage.setItem('userEmail', resultado.usuario.email);
+        localStorage.setItem('userNome', resultado.usuario.nome);
+        localStorage.setItem('userPlano', resultado.usuario.plano);
+        localStorage.setItem('codigoIndicacao', resultado.usuario.codigoIndicacao);
+        return { sucesso: true };
+      }
+      
+      return { sucesso: false, erro: 'Email ou senha incorretos' };
+    } catch (error) {
+      console.error('Erro no login:', error);
+      return { sucesso: false, erro: 'Erro ao conectar' };
+    }
+  }
+
+  async hashSenha(senha) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(senha + 'SALT_SISTEMA_FINANCEIRO');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  verificarLogado() {
+    return !!(localStorage.getItem('userId') && localStorage.getItem('userToken'));
+  }
+
+  async obterContador() {
+    const userId = localStorage.getItem('userId');
+    
+    const response = await fetch(this.SHEETS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        acao: 'obterContador',
+        userId: userId
+      })
+    });
+
+    const resultado = await response.json();
+    return resultado.contador || 0;
+  }
+}
+
+const sistema = new SistemaLicencas(SHEETS_URL);
+
+// ==================== FUNÇÕES DE UI ==================== 
 function switchTab(tab) {
-  // Remover active de todas as tabs
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.form-section').forEach(f => f.classList.remove('active'));
   
-  // Ativar tab selecionada
   if (tab === 'login') {
     document.querySelectorAll('.tab')[0].classList.add('active');
     document.getElementById('loginForm').classList.add('active');
@@ -366,37 +697,24 @@ function switchTab(tab) {
     document.getElementById('registerForm').classList.add('active');
   }
   
-  // Limpar mensagens
-  hideMessage();
+  document.getElementById('loginMessage').style.display = 'none';
 }
 
 function showMessage(mensagem, tipo = 'success') {
-  const messageEl = document.getElementById('message');
-  messageEl.textContent = mensagem;
-  messageEl.className = `message ${tipo}`;
-  messageEl.style.display = 'block';
+  const msg = document.getElementById('loginMessage');
+  msg.textContent = mensagem;
+  msg.className = `message ${tipo}`;
+  msg.style.display = 'block';
+}
+
+function showToast(mensagem, tipo = 'success') {
+  const toast = document.getElementById('toast');
+  toast.textContent = mensagem;
+  toast.className = `toast ${tipo} show`;
   
-  // Auto-esconder após 5 segundos
   setTimeout(() => {
-    hideMessage();
-  }, 5000);
-}
-
-function hideMessage() {
-  const messageEl = document.getElementById('message');
-  messageEl.style.display = 'none';
-}
-
-function showLoading() {
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('btnLogin').disabled = true;
-  document.getElementById('btnRegister').disabled = true;
-}
-
-function hideLoading() {
-  document.getElementById('loading').classList.remove('show');
-  document.getElementById('btnLogin').disabled = false;
-  document.getElementById('btnRegister').disabled = false;
+    toast.classList.remove('show');
+  }, 3000);
 }
 
 // ==================== HANDLERS ====================
@@ -406,32 +724,20 @@ async function handleLogin(event) {
   const email = document.getElementById('loginEmail').value;
   const senha = document.getElementById('loginSenha').value;
   
-  if (!email || !senha) {
-    showMessage('Preencha todos os campos', 'error');
-    return;
-  }
+  document.getElementById('btnLogin').disabled = true;
+  document.getElementById('btnLogin').textContent = 'Entrando...';
   
-  showLoading();
-  hideMessage();
+  const resultado = await sistema.fazerLogin(email, senha);
   
-  try {
-    const resultado = await sistema.fazerLogin(email, senha);
-    
-    if (resultado.sucesso) {
-      showMessage('✅ Login realizado com sucesso! Redirecionando...', 'success');
-      
-      // Redirecionar para o sistema após 1 segundo
-      setTimeout(() => {
-        window.location.href = 'index.html'; // Seu sistema principal
-      }, 1000);
-    } else {
-      showMessage('❌ ' + (resultado.erro || 'Email ou senha incorretos'), 'error');
-    }
-  } catch (error) {
-    console.error('Erro no login:', error);
-    showMessage('❌ Erro ao conectar. Tente novamente.', 'error');
-  } finally {
-    hideLoading();
+  if (resultado.sucesso) {
+    showMessage('✅ Login realizado! Redirecionando...', 'success');
+    setTimeout(() => {
+      mostrarSistemaPrincipal();
+    }, 1000);
+  } else {
+    showMessage('❌ ' + resultado.erro, 'error');
+    document.getElementById('btnLogin').disabled = false;
+    document.getElementById('btnLogin').textContent = 'Entrar';
   }
 }
 
@@ -442,69 +748,75 @@ async function handleRegister(event) {
   const email = document.getElementById('regEmail').value;
   const senha = document.getElementById('regSenha').value;
   const senhaConfirm = document.getElementById('regSenhaConfirm').value;
-  const codigoReferral = document.getElementById('regReferral').value;
-  
-  // Validações
-  if (!nome || !email || !senha) {
-    showMessage('Preencha todos os campos obrigatórios', 'error');
-    return;
-  }
   
   if (senha !== senhaConfirm) {
-    showMessage('As senhas não coincidem', 'error');
+    showMessage('❌ As senhas não coincidem', 'error');
     return;
   }
   
-  if (senha.length < 6) {
-    showMessage('A senha deve ter no mínimo 6 caracteres', 'error');
-    return;
-  }
+  document.getElementById('btnRegister').disabled = true;
+  document.getElementById('btnRegister').textContent = 'Criando conta...';
   
-  showLoading();
-  hideMessage();
+  const resultado = await sistema.registrarUsuario(email, senha, nome);
   
-  try {
-    const resultado = await sistema.registrarUsuario(email, senha, nome);
-    
-    if (resultado.sucesso) {
-      // Se tem código de indicação, registrar
-      if (codigoReferral) {
-        await sistema.registrarIndicacao(codigoReferral);
-      }
-      
-      showMessage('✅ Conta criada com sucesso! Redirecionando...', 'success');
-      
-      // Redirecionar para o sistema após 1 segundo
-      setTimeout(() => {
-        window.location.href = 'index.html';
-      }, 1000);
-    } else {
-      showMessage('❌ ' + (resultado.erro || 'Erro ao criar conta'), 'error');
-    }
-  } catch (error) {
-    console.error('Erro no registro:', error);
-    showMessage('❌ Erro ao conectar. Tente novamente.', 'error');
-  } finally {
-    hideLoading();
+  if (resultado.sucesso) {
+    showMessage('✅ Conta criada! Redirecionando...', 'success');
+    setTimeout(() => {
+      mostrarSistemaPrincipal();
+    }, 1000);
+  } else {
+    showMessage('❌ ' + resultado.erro, 'error');
+    document.getElementById('btnRegister').disabled = false;
+    document.getElementById('btnRegister').textContent = 'Criar Conta Grátis';
   }
 }
 
-// ==================== VERIFICAR SE JÁ ESTÁ LOGADO ====================
+function mostrarSistemaPrincipal() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainSystem').classList.add('active');
+  
+  const nome = localStorage.getItem('userNome');
+  const plano = localStorage.getItem('userPlano') || 'gratuito';
+  
+  document.getElementById('userName').textContent = 'Olá, ' + nome + '!';
+  document.getElementById('userPlanDisplay').textContent = 'Plano: ' + plano.charAt(0).toUpperCase() + plano.slice(1);
+  document.getElementById('planName').textContent = plano.charAt(0).toUpperCase() + plano.slice(1);
+  
+  atualizarInfoPlano();
+}
+
+async function atualizarInfoPlano() {
+  const plano = localStorage.getItem('userPlano') || 'gratuito';
+  
+  if (plano === 'gratuito') {
+    const contador = await sistema.obterContador();
+    document.getElementById('planLimits').textContent = `${contador}/50 transações`;
+  } else {
+    document.getElementById('planLimits').textContent = 'Transações ilimitadas ✨';
+  }
+}
+
+function fazerLogout() {
+  if (confirm('Deseja sair do sistema?')) {
+    localStorage.clear();
+    location.reload();
+  }
+}
+
+function abrirPlanos() {
+  showToast('Página de planos em desenvolvimento', 'warning');
+  // Aqui você pode abrir um modal ou nova página com os planos
+}
+
+function abrirIndicacoes() {
+  const codigo = localStorage.getItem('codigoIndicacao');
+  alert('Seu código de indicação:\n\n' + codigo + '\n\nCompartilhe com amigos!');
+}
+
+// ==================== INICIALIZAÇÃO ====================
 window.onload = function() {
   if (sistema.verificarLogado()) {
-    // Já está logado, redirecionar
-    window.location.href = 'index.html';
-  }
-  
-  // Verificar se tem código de indicação na URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const refCode = urlParams.get('ref');
-  
-  if (refCode) {
-    // Mudar para aba de registro e preencher código
-    switchTab('register');
-    document.getElementById('regReferral').value = refCode;
-    showMessage('✨ Você foi indicado! Complete o cadastro para ganhar bônus.', 'success');
+    mostrarSistemaPrincipal();
   }
 };
 </script>
